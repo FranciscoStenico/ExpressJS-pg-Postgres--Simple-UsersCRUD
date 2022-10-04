@@ -17,7 +17,7 @@ class Ensure {
         return response.status(401).send({ message: 'Invalid token' });
       }
 
-      request.user = { isAdm: decoded.isAdm, uuid: decoded.uuid };
+      request.user = { is_adm: decoded.is_adm, id: decoded.id };
       next();
     };
 
@@ -25,8 +25,8 @@ class Ensure {
   }
 
   static adminOnly(request, response, next) {
-    const { isAdm } = request.user;
-    if (!isAdm) {
+    const { is_adm } = request.user;
+    if (!is_adm) {
       return response.status(401).send({ message: 'Unauthorized' });
     }
 
@@ -34,11 +34,11 @@ class Ensure {
   }
 
   static adminPermissions(request, response, next) {
-    const { isAdm, uuid } = request.user;
+    const { is_adm, id: uuid } = request.user;
     const { id } = request.params;
 
     const equalIds = uuid === id;
-    if (!isAdm && !equalIds) {
+    if (!is_adm && !equalIds) {
       return response
         .status(401)
         .send({ message: 'Missing admin permissions' });

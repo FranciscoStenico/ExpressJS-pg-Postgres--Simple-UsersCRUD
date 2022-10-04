@@ -11,8 +11,8 @@ app.use('/login', sessionRoute);
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  startDB();
+app.listen(PORT, async () => {
+  await startDB();
   console.log(`server is running at port ${PORT}`);
 });
 

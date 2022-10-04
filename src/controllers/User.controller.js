@@ -22,26 +22,26 @@ class UsersControllers {
     }
   }
 
-  static profile(request, response) {
+  static async profile(request, response) {
     try {
-      const { uuid } = request.user;
-      const userProfile = services.profile(uuid);
+      const { id } = request.user;
+      const userProfile = await services.profile(id);
 
-      return response.status(200).send(userProfile);
-    } catch (error) {
-      return response.status(404).send({ message: error.message });
+      return response.status(200).json(userProfile);
+    } catch ({ message }) {
+      return response.status(404).json({ message });
     }
   }
 
-  static update(request, response) {
+  static async update(request, response) {
     try {
       const { id } = request.params;
       const updates = request.body;
-      const updatedProfile = services.update(id, updates);
+      const updatedProfile = await services.update(id, updates);
 
-      return response.status(200).send(updatedProfile);
-    } catch (error) {
-      return response.status(404).send({ message: error.message });
+      return response.status(200).json(updatedProfile);
+    } catch ({ message }) {
+      return response.status(404).json({ message });
     }
   }
 
@@ -50,9 +50,9 @@ class UsersControllers {
       const { id } = request.params;
       services.delete(id);
 
-      return response.status(204).send();
-    } catch (error) {
-      return response.status(404).json({ message: error.message });
+      return response.status(204).json();
+    } catch ({ message }) {
+      return response.status(404).json({ message });
     }
   }
 }

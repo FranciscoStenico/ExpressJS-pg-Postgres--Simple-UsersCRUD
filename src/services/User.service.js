@@ -15,7 +15,8 @@ class UserServices {
         [email, name, hashedKey, is_adm]
       );
 
-      return res.rows[0];
+      const { id, created_on, updated_on } = res.rows[0];
+      return { id, email, name, is_adm, created_on, updated_on };
     } catch (error) {
       throw new Error(error);
     }
@@ -31,38 +32,59 @@ class UserServices {
     }
   }
 
-  static profile(id) {
-    const userProfile = users.find(({ uuid }) => uuid == id);
-    if (!userProfile) {
-      throw new Error('User not found');
-    }
+  static async profile(id) {
+    try {
+      const res = await database.query('SELECT * FROM users WHERE id = $1', [
+        id,
+      ]);
 
-    const { name, email, isAdm, createdOn, updatedOn, uuid } = userProfile;
-    return { name, email, isAdm, createdOn, updatedOn, uuid };
+      const { name, email, is_adm, created_on, updated_on } = res.rows[0];
+      return { id, name, email, is_adm, created_on, updated_on };
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
-  static update(id, updates) {
-    const userIndex = users.findIndex(({ uuid }) => uuid == id);
-    const user = users.find(({ uuid }) => uuid == id);
-    if (!user) {
-      throw new Error('User not found');
+  static async update(id, updates) {
+    try {
+      let query = 'UPDATE users SET ';
+      const keys = Object.keys(updates);
+      const values = Object.values(updates);
+
+      keys.forEach((key, index, arr) => {
+        query += `${key} = \$${index + 1}, `;
+        query =
+          index === arr.length - 1
+            ? query.slice(0, -2) +
+              `,
+              updated_on = now() - INTERVAL '3 hours'
+              WHERE 
+                id = \$${arr.length + 1} 
+              RETURNING *
+            `
+            : query;
+      });
+
+      const res = await database.query(query, [...values, id]);
+      const { email, name, is_adm, created_on, updated_on } = res.rows[0];
+
+      return { id, email, name, is_adm, created_on, updated_on };
+    } catch (error) {
+      throw new Error(error);
     }
 
-    const now = new Date().toJSON();
-    const updatedUser = { ...user, ...updates, updatedOn: now };
-    const { name, email, isAdm, createdOn, updatedOn, uuid } = updatedUser;
-
-    users.splice(userIndex, 1, updatedUser);
-    return { name, email, isAdm, createdOn, updatedOn, uuid };
+    /* return res.rows[0]; */
   }
 
-  static delete(id) {
-    const userIndex = users.findIndex((user) => user.uuid === id);
-    if (userIndex === -1) {
-      throw new Error('User not found');
+  static async delete(id) {
+    try {
+      const res = await database.query('DELETE FROM users WHERE id = $1', [id]);
+      if (!res.rowCount) {
+        throw new Error('User not found');
+      }
+    } catch (error) {
+      throw new Error(error);
     }
-
-    users.splice(this.userIndex(id), 1);
   }
 }
 
