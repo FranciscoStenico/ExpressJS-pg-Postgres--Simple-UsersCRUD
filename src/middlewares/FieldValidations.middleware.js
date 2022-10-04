@@ -1,5 +1,5 @@
 class FieldValidations {
-  static register = ['name', 'email', 'password', 'isAdm'];
+  static register = ['name', 'email', 'password', 'is_adm'];
   static login = ['email', 'password'];
   static updateUser = ['name', 'email'];
 

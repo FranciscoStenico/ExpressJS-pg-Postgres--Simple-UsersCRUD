@@ -3,18 +3,23 @@ import services from '../services/User.service';
 class UsersControllers {
   static async register(request, response) {
     try {
-      const { name, email, password, isAdm } = request.body;
-      const newUser = await services.register(name, email, password, isAdm);
+      const { name, email, password, is_adm } = request.body;
+      const newUser = await services.register(name, email, password, is_adm);
 
-      return response.status(201).send(newUser);
-    } catch (error) {
-      return response.status(400).send({ message: error.message });
+      return response.status(201).json(newUser);
+    } catch ({ message }) {
+      return response.status(400).json({ message });
     }
   }
 
-  static list(_, response) {
-    const newUser = services.list();
-    return response.status(200).send(newUser);
+  static async list(_, response) {
+    try {
+      const users = await services.list();
+
+      return response.status(200).json(users);
+    } catch ({ message }) {
+      return response.status(404).json({ message });
+    }
   }
 
   static profile(request, response) {

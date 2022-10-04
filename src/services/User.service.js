@@ -1,27 +1,34 @@
 import { hash } from 'bcryptjs';
-import { v4 } from 'uuid';
-
-import users from '../database';
+import database from '../database';
 
 class UserServices {
-  static async register(name, email, password, isAdm) {
-    const alreadyExist = users.some((user) => user.email == email);
-    if (alreadyExist) {
-      throw new Error('Email already on use');
-    }
-
+  static async register(name, email, password, is_adm) {
     const hashedKey = await hash(password, 10);
-    const now = new Date().toJSON();
-    const uuid = v4();
+    try {
+      const res = await database.query(
+        `
+        INSERT INTO 
+          users(email, name, password, is_adm) 
+        VALUES 
+          ($1, $2, $3, $4) 
+        RETURNING *`,
+        [email, name, hashedKey, is_adm]
+      );
 
-    // prettier-ignore
-    const newUser = {name, email, isAdm, createdOn: now, updatedOn: now, uuid}
-    users.push({ ...newUser, password: hashedKey });
-    return newUser;
+      return res.rows[0];
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
-  static list() {
-    return users;
+  static async list() {
+    try {
+      const res = await database.query('SELECT * FROM users');
+
+      return res.rows;
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   static profile(id) {
