@@ -9,7 +9,7 @@ class FieldValidations {
       if (!this.compare(fields, request, type)) {
         return response
           .status(400)
-          .send({ message: `Required fields: ${fields.join(', ')}` });
+          .send({ message: `Field options: ${fields.join(', ')}` });
       }
 
       next();
